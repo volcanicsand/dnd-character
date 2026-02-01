@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penny's D&D Character Creator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=MedievalSharp&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #1a1025;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(100, 50, 150, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(180, 140, 50, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(60, 30, 100, 0.2) 0%, transparent 70%);
+            min-height: 100vh;
+            color: #e8dcc8;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1.5rem 0 1rem;
+        }
+
+        .header .icon { font-size: 2rem; display: block; margin-bottom: 0.3rem; }
+
+        .header h1 {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.7rem;
+            color: #d4a843;
+            text-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 0.85rem;
+            color: #9a8a70;
+            margin-top: 0.3rem;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            height: 10px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            border: 1px solid rgba(212,168,67,0.2);
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #8b5cf6, #d4a843);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-label {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #9a8a70;
+            margin-bottom: 0.8rem;
+        }
+
+        .card {
+            background: rgba(30, 20, 45, 0.85);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(212,168,67,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .step-title {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.3rem;
+            color: #d4a843;
+            text-align: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .step-subtitle {
+            font-size: 0.85rem;
+            color: #9a8a70;
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        /* Name input */
+        .name-input {
+            width: 100%;
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(212,168,67,0.3);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e8dcc8;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .name-input:focus { border-color: #d4a843; }
+        .name-input::placeholder { color: #6a5a48; }
+
+        /* Grid selections */
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .option-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(212,168,67,0.15);
+            border-radius: 12px;
+            padding: 0.7rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            background: rgba(212,168,67,0.1);
+            border-color: rgba(212,168,67,0.4);
+            transform: translateY(-2px);
+        }
+
+        .option-card.selected {
+            background: rgba(212,168,67,0.15);
+            border-color: #d4a843;
+            box-shadow: 0 0 12px rgba(212,168,67,0.2);
+        }
+
+        .option-card .opt-icon { font-size: 1.5rem; display: block; margin-bottom: 0.2rem; }
+        .option-card .opt-name { font-weight: 700; font-size: 0.9rem; color: #e8dcc8; }
+        .option-card .opt-desc { font-size: 0.7rem; color: #9a8a70; margin-top: 0.15rem; }
+
+        /* Alignment grid */
+        .align-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.4rem;
+        }
+
+        .align-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(212,168,67,0.15);
+            border-radius: 10px;
+            padding: 0.6rem 0.3rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #c0b090;
+        }
+
+        .align-card:hover {
+            background: rgba(212,168,67,0.1);
+            border-color: rgba(212,168,67,0.4);
+        }
+
+        .align-card.selected {
+            background: rgba(212,168,67,0.15);
+            border-color: #d4a843;
+            color: #d4a843;
+        }
+
+        /* Stats */
+        .stat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,168,67,0.15);
+            border-radius: 10px;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #d4a843;
+            min-width: 50px;
+        }
+
+        .stat-abbr {
+            font-size: 0.7rem;
+            color: #9a8a70;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #e8dcc8;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .stat-mod {
+            font-size: 0.8rem;
+            color: #9a8a70;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .roll-btn {
+            background: rgba(139, 92, 246, 0.3);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 8px;
+            padding: 0.3rem 0.6rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #c4b5f0;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .roll-btn:hover { background: rgba(139, 92, 246, 0.5); }
+
+        .roll-all-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            margin-top: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .roll-all-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+
+        .dice-display {
+            font-size: 0.7rem;
+            color: #7a6a58;
+            text-align: center;
+        }
+
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(15deg) scale(1.1); }
+            50% { transform: rotate(-10deg) scale(1.05); }
+            75% { transform: rotate(5deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .rolling { animation: diceRoll 0.4s ease; }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #d4a843, #b8922e);
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #1a1025;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(212,168,67,0.3); }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Character sheet */
+        .sheet {
+            text-align: center;
+        }
+
+        .sheet-name {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 2rem;
+            color: #d4a843;
+            margin-bottom: 0.3rem;
+            text-shadow: 0 0 20px rgba(212,168,67,0.3);
+        }
+
+        .sheet-subtitle {
+            font-size: 1rem;
+            color: #c0b090;
+            margin-bottom: 1rem;
+        }
+
+        .sheet-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,168,67,0.15);
+            border-radius: 12px;
+            padding: 0.8rem;
+            margin-bottom: 0.6rem;
+            text-align: left;
+        }
+
+        .sheet-section-title {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 0.9rem;
+            color: #d4a843;
+            margin-bottom: 0.4rem;
+        }
+
+        .sheet-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.4rem;
+        }
+
+        .sheet-stat {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .sheet-stat .label { font-size: 0.65rem; color: #9a8a70; font-weight: 700; }
+        .sheet-stat .value { font-size: 1.3rem; font-weight: 800; color: #d4a843; }
+        .sheet-stat .mod { font-size: 0.75rem; color: #9a8a70; }
+
+        .sheet-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .sheet-row .label { color: #9a8a70; }
+        .sheet-row .value { color: #e8dcc8; font-weight: 700; }
+
+        .btn-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-row .btn { flex: 1; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #e8dcc8;
+        }
+
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        @media (max-width: 400px) {
+            .header h1 { font-size: 1.4rem; }
+            .option-grid { grid-template-columns: 1fr 1fr; }
+            .sheet-stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🐉</span>
+            <h1>Penny's D&D Character Creator</h1>
+            <div class="subtitle">Forge your hero</div>
+        </div>
+
+        <div class="progress-label">Step <span id="step-num">1</span> of 6</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+        <div class="card" id="card"></div>
+    </div>
+
+    <script>
+const races = [
+    { name: "Human", icon: "🧑", desc: "Versatile and ambitious" },
+    { name: "Elf", icon: "🧝", desc: "Graceful and wise" },
+    { name: "Dwarf", icon: "⛏️", desc: "Tough and sturdy" },
+    { name: "Halfling", icon: "🍀", desc: "Lucky and nimble" },
+    { name: "Gnome", icon: "🔧", desc: "Clever and curious" },
+    { name: "Half-Orc", icon: "💪", desc: "Strong and fierce" },
+    { name: "Tiefling", icon: "😈", desc: "Mysterious and charming" },
+    { name: "Dragonborn", icon: "🐲", desc: "Proud and powerful" }
+];
+
+const classes = [
+    { name: "Fighter", icon: "⚔️", desc: "Master of weapons and armor" },
+    { name: "Wizard", icon: "🔮", desc: "Powerful arcane spellcaster" },
+    { name: "Rogue", icon: "🗡️", desc: "Stealthy and cunning" },
+    { name: "Cleric", icon: "✝️", desc: "Divine healer and protector" },
+    { name: "Ranger", icon: "🏹", desc: "Wilderness tracker and hunter" },
+    { name: "Bard", icon: "🎵", desc: "Musical magic and charm" },
+    { name: "Paladin", icon: "🛡️", desc: "Holy warrior of justice" },
+    { name: "Barbarian", icon: "🪓", desc: "Raging unstoppable force" },
+    { name: "Sorcerer", icon: "⚡", desc: "Born with innate magic" },
+    { name: "Druid", icon: "🌿", desc: "Nature's shapeshifting guardian" },
+    { name: "Monk", icon: "👊", desc: "Martial arts master" },
+    { name: "Warlock", icon: "👁️", desc: "Pact-bound dark magic" }
+];
+
+const backgrounds = [
+    { name: "Acolyte", icon: "🕯️", desc: "Raised in a temple" },
+    { name: "Criminal", icon: "🦹", desc: "Life outside the law" },
+    { name: "Folk Hero", icon: "🌾", desc: "Champion of the common people" },
+    { name: "Noble", icon: "👑", desc: "Born into privilege" },
+    { name: "Sage", icon: "📚", desc: "Scholar and researcher" },
+    { name: "Soldier", icon: "⚔️", desc: "Trained for battle" },
+    { name: "Entertainer", icon: "🎭", desc: "Born performer" },
+    { name: "Outlander", icon: "🏔️", desc: "Raised in the wilds" }
+];
+
+const alignments = [
+    "Lawful Good", "Neutral Good", "Chaotic Good",
+    "Lawful Neutral", "True Neutral", "Chaotic Neutral",
+    "Lawful Evil", "Neutral Evil", "Chaotic Evil"
+];
+
+const statNames = [
+    { name: "Strength", abbr: "STR" },
+    { name: "Dexterity", abbr: "DEX" },
+    { name: "Constitution", abbr: "CON" },
+    { name: "Intelligence", abbr: "INT" },
+    { name: "Wisdom", abbr: "WIS" },
+    { name: "Charisma", abbr: "CHA" }
+];
+
+let character = {
+    name: "",
+    race: null,
+    class: null,
+    stats: [0, 0, 0, 0, 0, 0],
+    rolls: [[], [], [], [], [], []],
+    background: null,
+    alignment: null
+};
+
+let currentStep = 0;
+const totalSteps = 6;
+
+function updateProgress() {
+    document.getElementById('step-num').textContent = currentStep + 1;
+    document.getElementById('progress-fill').style.width = ((currentStep) / totalSteps * 100) + '%';
+}
+
+function roll4d6() {
+    const dice = [1,2,3,4].map(() => Math.floor(Math.random() * 6) + 1);
+    dice.sort((a, b) => a - b);
+    const dropped = dice[0];
+    const kept = dice.slice(1);
+    return { total: kept.reduce((a, b) => a + b, 0), dice, dropped };
+}
+
+function getMod(stat) {
+    const mod = Math.floor((stat - 10) / 2);
+    return mod >= 0 ? `+${mod}` : `${mod}`;
+}
+
+function showStep() {
+    updateProgress();
+    const card = document.getElementById('card');
+
+    switch (currentStep) {
+        case 0: showNameStep(card); break;
+        case 1: showRaceStep(card); break;
+        case 2: showClassStep(card); break;
+        case 3: showStatsStep(card); break;
+        case 4: showBackgroundStep(card); break;
+        case 5: showAlignmentStep(card); break;
+        case 6: showSheet(card); break;
+    }
+}
+
+function showNameStep(card) {
+    card.innerHTML = `
+        <div class="step-title">Name Your Hero</div>
+        <div class="step-subtitle">What shall they be called?</div>
+        <input class="name-input" id="char-name" type="text" placeholder="Enter a name..." value="${character.name}" maxlength="30" autofocus>
+        <button class="btn" id="next-btn" onclick="saveName()" ${character.name ? '' : 'disabled'}>Next</button>
+    `;
+    const input = document.getElementById('char-name');
+    input.addEventListener('input', () => {
+        document.getElementById('next-btn').disabled = !input.value.trim();
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && input.value.trim()) saveName();
+    });
+}
+
+function saveName() {
+    character.name = document.getElementById('char-name').value.trim();
+    if (!character.name) return;
+    currentStep++;
+    showStep();
+}
+
+function showRaceStep(card) {
+    card.innerHTML = `
+        <div class="step-title">Choose Your Race</div>
+        <div class="step-subtitle">What blood runs through your veins?</div>
+        <div class="option-grid">
+            ${races.map(r => `
+                <div class="option-card ${character.race === r.name ? 'selected' : ''}" onclick="selectRace('${r.name}')">
+                    <span class="opt-icon">${r.icon}</span>
+                    <div class="opt-name">${r.name}</div>
+                    <div class="opt-desc">${r.desc}</div>
+                </div>
+            `).join('')}
+        </div>
+        <button class="btn" id="next-btn" onclick="nextStep()" ${character.race ? '' : 'disabled'}>Next</button>
+    `;
+}
+
+function selectRace(name) {
+    character.race = name;
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    event.target.closest('.option-card').classList.add('selected');
+    document.getElementById('next-btn').disabled = false;
+}
+
+function showClassStep(card) {
+    card.innerHTML = `
+        <div class="step-title">Choose Your Class</div>
+        <div class="step-subtitle">How will you fight?</div>
+        <div class="option-grid">
+            ${classes.map(c => `
+                <div class="option-card ${character.class === c.name ? 'selected' : ''}" onclick="selectClass('${c.name}')">
+                    <span class="opt-icon">${c.icon}</span>
+                    <div class="opt-name">${c.name}</div>
+                    <div class="opt-desc">${c.desc}</div>
+                </div>
+            `).join('')}
+        </div>
+        <button class="btn" id="next-btn" onclick="nextStep()" ${character.class ? '' : 'disabled'}>Next</button>
+    `;
+}
+
+function selectClass(name) {
+    character.class = name;
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    event.target.closest('.option-card').classList.add('selected');
+    document.getElementById('next-btn').disabled = false;
+}
+
+function showStatsStep(card) {
+    const hasStats = character.stats.some(s => s > 0);
+    card.innerHTML = `
+        <div class="step-title">Roll Your Stats</div>
+        <div class="step-subtitle">Roll 4d6, drop the lowest die</div>
+        <div id="stats-container">
+            ${statNames.map((s, i) => `
+                <div class="stat-row" id="stat-row-${i}">
+                    <div>
+                        <span class="stat-name">${s.abbr}</span>
+                        <span class="stat-abbr"> ${s.name}</span>
+                    </div>
+                    <div class="dice-display" id="dice-${i}">${character.rolls[i].length ? renderDice(character.rolls[i], character.stats[i]) : ''}</div>
+                    <span class="stat-value" id="stat-val-${i}">${character.stats[i] || '—'}</span>
+                    <span class="stat-mod" id="stat-mod-${i}">${character.stats[i] ? getMod(character.stats[i]) : ''}</span>
+                    <button class="roll-btn" onclick="rollStat(${i})">🎲 Roll</button>
+                </div>
+            `).join('')}
+        </div>
+        <button class="roll-all-btn" onclick="rollAll()">🎲 Roll All Stats</button>
+        <button class="btn" id="next-btn" onclick="nextStep()" ${hasStats ? '' : 'disabled'}>Next</button>
+    `;
+}
+
+function renderDice(rolls, total) {
+    if (!rolls.length) return '';
+    const sorted = [...rolls].sort((a, b) => a - b);
+    return sorted.map((d, i) => i === 0 ? `<span style="text-decoration:line-through;opacity:0.4">${d}</span>` : d).join(' + ') + ` = ${total}`;
+}
+
+function rollStat(index) {
+    const result = roll4d6();
+    character.stats[index] = result.total;
+    character.rolls[index] = result.dice;
+
+    const valEl = document.getElementById(`stat-val-${index}`);
+    const modEl = document.getElementById(`stat-mod-${index}`);
+    const diceEl = document.getElementById(`dice-${index}`);
+    const row = document.getElementById(`stat-row-${index}`);
+
+    row.classList.add('rolling');
+    setTimeout(() => row.classList.remove('rolling'), 400);
+
+    valEl.textContent = result.total;
+    modEl.textContent = getMod(result.total);
+    diceEl.innerHTML = renderDice(result.dice, result.total);
+
+    if (character.stats.every(s => s > 0)) {
+        document.getElementById('next-btn').disabled = false;
+    }
+}
+
+function rollAll() {
+    statNames.forEach((_, i) => {
+        setTimeout(() => rollStat(i), i * 150);
+    });
+}
+
+function showBackgroundStep(card) {
+    card.innerHTML = `
+        <div class="step-title">Choose Your Background</div>
+        <div class="step-subtitle">Where do you come from?</div>
+        <div class="option-grid">
+            ${backgrounds.map(b => `
+                <div class="option-card ${character.background === b.name ? 'selected' : ''}" onclick="selectBackground('${b.name}')">
+                    <span class="opt-icon">${b.icon}</span>
+                    <div class="opt-name">${b.name}</div>
+                    <div class="opt-desc">${b.desc}</div>
+                </div>
+            `).join('')}
+        </div>
+        <button class="btn" id="next-btn" onclick="nextStep()" ${character.background ? '' : 'disabled'}>Next</button>
+    `;
+}
+
+function selectBackground(name) {
+    character.background = name;
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    event.target.closest('.option-card').classList.add('selected');
+    document.getElementById('next-btn').disabled = false;
+}
+
+function showAlignmentStep(card) {
+    card.innerHTML = `
+        <div class="step-title">Choose Your Alignment</div>
+        <div class="step-subtitle">Where does your moral compass point?</div>
+        <div class="align-grid">
+            ${alignments.map(a => `
+                <div class="align-card ${character.alignment === a ? 'selected' : ''}" onclick="selectAlignment('${a}')">${a}</div>
+            `).join('')}
+        </div>
+        <button class="btn" id="next-btn" onclick="finishCharacter()" ${character.alignment ? '' : 'disabled'}>Create Character!</button>
+    `;
+}
+
+function selectAlignment(name) {
+    character.alignment = name;
+    document.querySelectorAll('.align-card').forEach(c => c.classList.remove('selected'));
+    event.target.closest('.align-card').classList.add('selected');
+    document.getElementById('next-btn').disabled = false;
+}
+
+function finishCharacter() {
+    currentStep = 6;
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('step-num').textContent = '✓';
+    showStep();
+}
+
+function showSheet(card) {
+    const raceObj = races.find(r => r.name === character.race);
+    const classObj = classes.find(c => c.name === character.class);
+    const bgObj = backgrounds.find(b => b.name === character.background);
+
+    card.innerHTML = `
+        <div class="sheet">
+            <div class="sheet-name">${character.name}</div>
+            <div class="sheet-subtitle">${raceObj.icon} ${character.race} ${classObj.icon} ${character.class}</div>
+
+            <div class="sheet-section">
+                <div class="sheet-section-title">Ability Scores</div>
+                <div class="sheet-stats-grid">
+                    ${statNames.map((s, i) => `
+                        <div class="sheet-stat">
+                            <div class="label">${s.abbr}</div>
+                            <div class="value">${character.stats[i]}</div>
+                            <div class="mod">${getMod(character.stats[i])}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="sheet-section">
+                <div class="sheet-section-title">Details</div>
+                <div class="sheet-row"><span class="label">Race</span><span class="value">${raceObj.icon} ${character.race}</span></div>
+                <div class="sheet-row"><span class="label">Class</span><span class="value">${classObj.icon} ${character.class}</span></div>
+                <div class="sheet-row"><span class="label">Background</span><span class="value">${bgObj.icon} ${character.background}</span></div>
+                <div class="sheet-row"><span class="label">Alignment</span><span class="value">${character.alignment}</span></div>
+                <div class="sheet-row"><span class="label">Hit Points</span><span class="value">${getHP()}</span></div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="copyCharacter()">📋 Copy</button>
+                <button class="btn" onclick="startOver()">🐉 New Character</button>
+            </div>
+        </div>
+    `;
+}
+
+function getHP() {
+    const conMod = Math.floor((character.stats[2] - 10) / 2);
+    const hitDice = {
+        'Barbarian': 12, 'Fighter': 10, 'Paladin': 10, 'Ranger': 10,
+        'Bard': 8, 'Cleric': 8, 'Druid': 8, 'Monk': 8, 'Rogue': 8, 'Warlock': 8,
+        'Sorcerer': 6, 'Wizard': 6
+    };
+    return (hitDice[character.class] || 8) + conMod;
+}
+
+function copyCharacter() {
+    const stats = statNames.map((s, i) => `${s.abbr}: ${character.stats[i]} (${getMod(character.stats[i])})`).join(', ');
+    const text = `${character.name} — ${character.race} ${character.class}
+Alignment: ${character.alignment} | Background: ${character.background}
+HP: ${getHP()} | ${stats}
+Made with Penny's D&D Character Creator: ${window.location.href}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btns = document.querySelectorAll('.btn-secondary');
+        btns[0].textContent = '✓ Copied!';
+        setTimeout(() => btns[0].textContent = '📋 Copy', 2000);
+    });
+}
+
+function startOver() {
+    character = { name: "", race: null, class: null, stats: [0,0,0,0,0,0], rolls: [[],[],[],[],[],[]], background: null, alignment: null };
+    currentStep = 0;
+    showStep();
+}
+
+function nextStep() {
+    currentStep++;
+    showStep();
+}
+
+// Start
+showStep();
+    </script>
+</body>
+</html>
