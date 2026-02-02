@@ -447,6 +447,7 @@ let character = {
     class: null,
     stats: [0, 0, 0, 0, 0, 0],
     rolls: [[], [], [], [], [], []],
+    locked: [false, false, false, false, false, false],
     background: null,
     alignment: null
 };
@@ -562,7 +563,7 @@ function showStatsStep(card) {
     const hasStats = character.stats.some(s => s > 0);
     card.innerHTML = `
         <div class="step-title">Roll Your Stats</div>
-        <div class="step-subtitle">Roll 4d6, drop the lowest die</div>
+        <div class="step-subtitle">Roll 4d6, drop the lowest -- one roll per stat!</div>
         <div id="stats-container">
             ${statNames.map((s, i) => `
                 <div class="stat-row" id="stat-row-${i}">
@@ -573,11 +574,11 @@ function showStatsStep(card) {
                     <div class="dice-display" id="dice-${i}">${character.rolls[i].length ? renderDice(character.rolls[i], character.stats[i]) : ''}</div>
                     <span class="stat-value" id="stat-val-${i}">${character.stats[i] || '—'}</span>
                     <span class="stat-mod" id="stat-mod-${i}">${character.stats[i] ? getMod(character.stats[i]) : ''}</span>
-                    <button class="roll-btn" onclick="rollStat(${i})">🎲 Roll</button>
+                    <button class="roll-btn" id="roll-btn-${i}" onclick="rollStat(${i})" ${character.locked[i] ? 'disabled style="opacity:0.3;cursor:default"' : ''}>🎲 ${character.locked[i] ? '✓' : 'Roll'}</button>
                 </div>
             `).join('')}
         </div>
-        <button class="roll-all-btn" onclick="rollAll()">🎲 Roll All Stats</button>
+        <button class="roll-all-btn" id="roll-all-btn" onclick="rollAll()" ${character.locked.every(l => l) ? 'disabled style="opacity:0.3;cursor:default"' : ''}>🎲 Roll All Stats</button>
         <button class="btn" id="next-btn" onclick="nextStep()" ${hasStats ? '' : 'disabled'}>Next</button>
     `;
 }
@@ -589,14 +590,18 @@ function renderDice(rolls, total) {
 }
 
 function rollStat(index) {
+    if (character.locked[index]) return;
+
     const result = roll4d6();
     character.stats[index] = result.total;
     character.rolls[index] = result.dice;
+    character.locked[index] = true;
 
     const valEl = document.getElementById(`stat-val-${index}`);
     const modEl = document.getElementById(`stat-mod-${index}`);
     const diceEl = document.getElementById(`dice-${index}`);
     const row = document.getElementById(`stat-row-${index}`);
+    const rollBtn = document.getElementById(`roll-btn-${index}`);
 
     row.classList.add('rolling');
     setTimeout(() => row.classList.remove('rolling'), 400);
@@ -605,14 +610,32 @@ function rollStat(index) {
     modEl.textContent = getMod(result.total);
     diceEl.innerHTML = renderDice(result.dice, result.total);
 
+    rollBtn.disabled = true;
+    rollBtn.style.opacity = '0.3';
+    rollBtn.style.cursor = 'default';
+    rollBtn.textContent = '🎲 ✓';
+
+    if (character.locked.every(l => l)) {
+        const rollAllBtn = document.getElementById('roll-all-btn');
+        if (rollAllBtn) {
+            rollAllBtn.disabled = true;
+            rollAllBtn.style.opacity = '0.3';
+            rollAllBtn.style.cursor = 'default';
+        }
+    }
+
     if (character.stats.every(s => s > 0)) {
         document.getElementById('next-btn').disabled = false;
     }
 }
 
 function rollAll() {
+    let delay = 0;
     statNames.forEach((_, i) => {
-        setTimeout(() => rollStat(i), i * 150);
+        if (!character.locked[i]) {
+            setTimeout(() => rollStat(i), delay * 150);
+            delay++;
+        }
     });
 }
 
@@ -732,7 +755,7 @@ Made with Penny's D&D Character Creator: ${window.location.href}`;
 }
 
 function startOver() {
-    character = { name: "", race: null, class: null, stats: [0,0,0,0,0,0], rolls: [[],[],[],[],[],[]], background: null, alignment: null };
+    character = { name: "", race: null, class: null, stats: [0,0,0,0,0,0], rolls: [[],[],[],[],[],[]], locked: [false,false,false,false,false,false], background: null, alignment: null };
     currentStep = 0;
     showStep();
 }
