@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Play Guide & DM Assistant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=MedievalSharp&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #1a1025;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(100, 50, 150, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(180, 140, 50, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(60, 30, 100, 0.2) 0%, transparent 70%);
+            min-height: 100vh;
+            color: #e8dcc8;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1.5rem 0 1rem;
+        }
+
+        .header .icon { font-size: 2rem; display: block; margin-bottom: 0.3rem; }
+
+        .header h1 {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.6rem;
+            color: #d4a843;
+            text-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 0.85rem;
+            color: #9a8a70;
+            margin-top: 0.3rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 0;
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(212,168,67,0.15);
+            border-radius: 10px 10px 0 0;
+            padding: 0.5rem 0.3rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #9a8a70;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .tab:hover { background: rgba(212,168,67,0.1); color: #c0b090; }
+
+        .tab.active {
+            background: rgba(212,168,67,0.15);
+            border-color: #d4a843;
+            color: #d4a843;
+            border-bottom-color: transparent;
+        }
+
+        .tab-icon { display: block; font-size: 1.1rem; margin-bottom: 0.15rem; }
+
+        .panel {
+            display: none;
+            background: rgba(30, 20, 45, 0.85);
+            border-radius: 0 0 16px 16px;
+            border: 1px solid rgba(212,168,67,0.2);
+            padding: 1.2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .panel.active { display: block; }
+
+        /* Shared styles */
+        .section-title {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.2rem;
+            color: #d4a843;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .section-title:first-child { margin-top: 0; }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,168,67,0.15);
+            border-radius: 12px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #d4a843;
+            margin-bottom: 0.3rem;
+        }
+
+        .card p, .card li {
+            font-size: 0.85rem;
+            color: #c0b090;
+            line-height: 1.5;
+        }
+
+        .card ul, .card ol {
+            padding-left: 1.2rem;
+            margin-top: 0.3rem;
+        }
+
+        .card li { margin-bottom: 0.2rem; }
+
+        .highlight {
+            color: #d4a843;
+            font-weight: 700;
+        }
+
+        .step-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: white;
+            margin-right: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: #c0b090;
+        }
+
+        .step-row .step-text { padding-top: 2px; }
+
+        .arrow-flow {
+            text-align: center;
+            color: #7a6a58;
+            font-size: 1.2rem;
+            margin: 0.2rem 0;
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 6px;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #c4b5f0;
+        }
+
+        .tag-gold {
+            background: rgba(212, 168, 67, 0.15);
+            border-color: rgba(212, 168, 67, 0.3);
+            color: #d4a843;
+        }
+
+        .tag-red {
+            background: rgba(180, 50, 50, 0.15);
+            border-color: rgba(180, 80, 80, 0.3);
+            color: #e88;
+        }
+
+        /* Collapsible */
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible::after {
+            content: ' +';
+            color: #8b5cf6;
+            font-weight: 800;
+        }
+
+        .collapsible.open::after { content: ' -'; }
+
+        .collapse-body {
+            display: none;
+            margin-top: 0.4rem;
+        }
+
+        .collapse-body.open { display: block; }
+
+        /* Combat tracker */
+        .input-row {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-row input {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(212,168,67,0.3);
+            border-radius: 8px;
+            padding: 0.5rem 0.6rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e8dcc8;
+            outline: none;
+        }
+
+        .input-row input:focus { border-color: #d4a843; }
+        .input-row input::placeholder { color: #6a5a48; }
+
+        .input-row input[type="number"] {
+            max-width: 70px;
+            text-align: center;
+            -moz-appearance: textfield;
+        }
+
+        .input-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+        .sm-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 0.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .sm-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(139, 92, 246, 0.3); }
+
+        .sm-btn-gold {
+            background: linear-gradient(135deg, #d4a843, #b8922e);
+            color: #1a1025;
+        }
+
+        .sm-btn-gold:hover { box-shadow: 0 3px 10px rgba(212, 168, 67, 0.3); }
+
+        .sm-btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(212,168,67,0.3);
+            color: #c0b090;
+        }
+
+        .sm-btn-outline:hover { border-color: #d4a843; color: #d4a843; background: rgba(212,168,67,0.05); box-shadow: none; }
+
+        .sm-btn-red {
+            background: rgba(180,50,50,0.3);
+            border: 1px solid rgba(180,80,80,0.4);
+            color: #e88;
+        }
+
+        .turn-list {
+            margin: 0.5rem 0;
+        }
+
+        .turn-entry {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1.5px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .turn-entry.active-turn {
+            background: rgba(212,168,67,0.12);
+            border-color: #d4a843;
+            box-shadow: 0 0 12px rgba(212,168,67,0.15);
+        }
+
+        .turn-init {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #8b5cf6;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .turn-name {
+            flex: 1;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #e8dcc8;
+        }
+
+        .turn-hp {
+            font-size: 0.8rem;
+            color: #e85555;
+            font-weight: 700;
+        }
+
+        .turn-remove {
+            background: none;
+            border: none;
+            color: #6a5a48;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0 0.2rem;
+        }
+
+        .turn-remove:hover { color: #e88; }
+
+        .round-display {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #9a8a70;
+            margin-bottom: 0.5rem;
+        }
+
+        .round-display strong {
+            color: #d4a843;
+            font-size: 1.1rem;
+        }
+
+        .turn-actions-box {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1.5px solid rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            padding: 0.7rem;
+            margin-top: 0.5rem;
+        }
+
+        .turn-actions-box .box-title {
+            font-weight: 800;
+            color: #c4b5f0;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .turn-actions-box li {
+            font-size: 0.8rem;
+            color: #b0a5c8;
+            margin-bottom: 0.15rem;
+        }
+
+        .combat-btns {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        /* Dice roller */
+        .dice-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.4rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .dice-btn {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(212,168,67,0.2);
+            border-radius: 10px;
+            padding: 0.6rem 0.3rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #c0b090;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .dice-btn:hover {
+            background: rgba(212,168,67,0.1);
+            border-color: rgba(212,168,67,0.4);
+            transform: translateY(-2px);
+        }
+
+        .dice-btn.selected {
+            background: rgba(212,168,67,0.15);
+            border-color: #d4a843;
+            color: #d4a843;
+        }
+
+        .dice-btn .dice-label { font-size: 0.65rem; color: #7a6a58; display: block; }
+
+        .dice-result-area {
+            text-align: center;
+            padding: 1rem;
+            min-height: 100px;
+        }
+
+        .dice-result-num {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 3rem;
+            color: #d4a843;
+            text-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+        }
+
+        .dice-result-detail {
+            font-size: 0.8rem;
+            color: #9a8a70;
+            margin-top: 0.3rem;
+        }
+
+        .dice-nat20 .dice-result-num { color: #4ade80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.4); }
+        .dice-nat1 .dice-result-num { color: #f87171; text-shadow: 0 0 20px rgba(248, 113, 113, 0.4); }
+
+        .modifier-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modifier-row label {
+            font-size: 0.85rem;
+            color: #9a8a70;
+            font-weight: 700;
+        }
+
+        .modifier-row input {
+            width: 60px;
+            background: rgba(255,255,255,0.08);
+            border: 1.5px solid rgba(212,168,67,0.3);
+            border-radius: 8px;
+            padding: 0.4rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #e8dcc8;
+            text-align: center;
+            outline: none;
+            -moz-appearance: textfield;
+        }
+
+        .modifier-row input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .modifier-row input:focus { border-color: #d4a843; }
+
+        .adv-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 0.3rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .adv-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(212,168,67,0.15);
+            border-radius: 8px;
+            padding: 0.35rem 0.7rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #9a8a70;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .adv-btn:hover { border-color: rgba(212,168,67,0.4); }
+
+        .adv-btn.selected {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: #8b5cf6;
+            color: #c4b5f0;
+        }
+
+        .roll-big-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .roll-big-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(15deg) scale(1.15); }
+            50% { transform: rotate(-10deg) scale(1.05); }
+            75% { transform: rotate(5deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .rolling { animation: diceRoll 0.35s ease; }
+
+        /* Reference tables */
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+        }
+
+        .ref-table th {
+            text-align: left;
+            padding: 0.4rem 0.5rem;
+            color: #d4a843;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1.5px solid rgba(212,168,67,0.3);
+        }
+
+        .ref-table td {
+            padding: 0.35rem 0.5rem;
+            color: #c0b090;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .ref-table td:first-child {
+            font-weight: 700;
+            color: #e8dcc8;
+            white-space: nowrap;
+        }
+
+        .note {
+            font-size: 0.75rem;
+            color: #7a6a58;
+            font-style: italic;
+            margin-top: 0.3rem;
+        }
+
+        @media (max-width: 400px) {
+            .header h1 { font-size: 1.3rem; }
+            .tabs { gap: 0.15rem; }
+            .tab { font-size: 0.65rem; padding: 0.4rem 0.2rem; }
+            .dice-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">📜</span>
+            <h1>D&D Play Guide</h1>
+            <div class="subtitle">How the game works & tools for playing</div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('flow')">
+                <span class="tab-icon">🗺️</span>How to Play
+            </div>
+            <div class="tab" onclick="switchTab('combat')">
+                <span class="tab-icon">⚔️</span>Combat
+            </div>
+            <div class="tab" onclick="switchTab('dice')">
+                <span class="tab-icon">🎲</span>Dice & Checks
+            </div>
+            <div class="tab" onclick="switchTab('ref')">
+                <span class="tab-icon">📖</span>Reference
+            </div>
+        </div>
+
+        <!-- HOW TO PLAY -->
+        <div class="panel active" id="panel-flow">
+
+            <div class="section-title">The Game Loop</div>
+            <div class="card">
+                <p>D&D is a conversation. The <span class="highlight">Dungeon Master (DM)</span> describes the world, and the <span class="highlight">players</span> say what their characters do. When the outcome is uncertain, you roll dice.</p>
+            </div>
+
+            <div class="card">
+                <div class="step-row"><span class="step-num">1</span><span class="step-text"><span class="highlight">DM describes the scene.</span> "You enter a dark cave. You hear growling ahead."</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">2</span><span class="step-text"><span class="highlight">Players decide what to do.</span> "I want to sneak closer" or "I cast Light on my staff."</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">3</span><span class="step-text"><span class="highlight">DM calls for a roll</span> (if needed). "Make a Stealth check." You roll a d20 + your modifier.</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">4</span><span class="step-text"><span class="highlight">DM narrates the result.</span> "You creep forward silently... and see two goblins around a campfire."</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">5</span><span class="step-text"><span class="highlight">Back to step 1.</span> The DM describes the new situation and players decide again.</span></div>
+            </div>
+
+            <div class="section-title">Three Types of Play</div>
+
+            <div class="card">
+                <div class="card-title">🗺️ Exploration</div>
+                <p>Traveling, searching rooms, finding traps and treasure, solving puzzles. The DM describes what you see; you say where you go and what you examine.</p>
+                <p class="note">Common checks: Perception (notice things), Investigation (examine closely), Survival (track/navigate)</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🗣️ Social Interaction</div>
+                <p>Talking to NPCs (non-player characters) &mdash; shopkeepers, kings, monsters. You can roleplay the conversation or just describe what you're trying to do.</p>
+                <p class="note">Common checks: Persuasion (convince), Deception (lie), Intimidation (threaten), Insight (read someone)</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">⚔️ Combat</div>
+                <p>Fighting monsters or enemies. This is the most structured part &mdash; everyone takes turns in order. See the <span class="highlight">Combat</span> tab for the full breakdown.</p>
+                <p class="note">Common rolls: Attack rolls, damage rolls, saving throws</p>
+            </div>
+
+            <div class="section-title">How Dice Rolls Work</div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">The d20: Your Most Important Die</div>
+                <div class="collapse-body">
+                    <p>Almost everything important uses a <span class="highlight">d20</span> (20-sided die):</p>
+                    <ul>
+                        <li><strong>Ability checks</strong> &mdash; Can I climb this wall? Pick this lock?</li>
+                        <li><strong>Attack rolls</strong> &mdash; Does my sword hit the goblin?</li>
+                        <li><strong>Saving throws</strong> &mdash; Can I dodge the dragon's fire?</li>
+                    </ul>
+                    <p style="margin-top:0.4rem">Formula: <span class="tag">d20 + your modifier = total</span></p>
+                    <p style="margin-top:0.3rem">The DM compares your total to a target number. Equal or higher = success.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Modifiers: Where Do They Come From?</div>
+                <div class="collapse-body">
+                    <p>Your modifier depends on what you're doing:</p>
+                    <ul>
+                        <li><strong>Ability check:</strong> ability modifier (+ proficiency bonus if proficient in that skill)</li>
+                        <li><strong>Attack roll:</strong> STR mod (melee) or DEX mod (ranged) + proficiency bonus</li>
+                        <li><strong>Saving throw:</strong> ability modifier (+ proficiency bonus if proficient)</li>
+                    </ul>
+                    <p style="margin-top:0.4rem">Your character sheet shows all these numbers already calculated!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Advantage & Disadvantage</div>
+                <div class="collapse-body">
+                    <p><span class="highlight">Advantage:</span> Roll 2d20, take the <strong>higher</strong> result. (Something is helping you.)</p>
+                    <p><span class="highlight">Disadvantage:</span> Roll 2d20, take the <strong>lower</strong> result. (Something is hindering you.)</p>
+                    <p style="margin-top:0.3rem">If you have both at the same time, they cancel out &mdash; roll normally.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Natural 20 & Natural 1</div>
+                <div class="collapse-body">
+                    <p><span class="highlight">Natural 20</span> (the d20 shows 20): On an <em>attack roll</em>, this is a <strong>critical hit!</strong> Roll your damage dice twice. On ability checks, it's just a really good roll (not auto-success in 5e rules, but many DMs treat it that way).</p>
+                    <p style="margin-top:0.3rem"><span class="highlight">Natural 1</span> (the d20 shows 1): On an <em>attack roll</em>, this always misses, no matter your modifier.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Damage Dice</div>
+                <div class="collapse-body">
+                    <p>When you hit with an attack or cast a damaging spell, you roll <strong>damage dice</strong>. These vary by weapon/spell:</p>
+                    <ul>
+                        <li><strong>Dagger:</strong> 1d4 + DEX mod</li>
+                        <li><strong>Longsword:</strong> 1d8 + STR mod (or 1d10 two-handed)</li>
+                        <li><strong>Greataxe:</strong> 1d12 + STR mod</li>
+                        <li><strong>Fire Bolt cantrip:</strong> 1d10 (no modifier)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-title">Resting</div>
+
+            <div class="card">
+                <div class="card-title">Short Rest <span class="tag">1 Hour</span></div>
+                <p>Spend Hit Dice to heal. Roll each Hit Die you spend + CON modifier, regain that many HP. Some abilities also recharge on a short rest.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Long Rest <span class="tag">8 Hours</span></div>
+                <p>Regain <strong>all</strong> lost HP and regain up to half your total Hit Dice. Spell slots and most abilities reset. You can only benefit from one long rest per 24 hours.</p>
+            </div>
+
+            <div class="section-title">Spellcasting</div>
+
+            <div class="card">
+                <div class="card-title">Who Can Cast Spells?</div>
+                <p>Only certain classes are spellcasters:</p>
+                <ul>
+                    <li><strong>Full casters</strong> (most spells): Wizard, Cleric, Bard, Druid, Sorcerer, Warlock</li>
+                    <li><strong>Half casters</strong> (fewer spells, starting at level 2): Paladin, Ranger</li>
+                    <li><strong>Non-casters:</strong> Fighter, Barbarian, Rogue, Monk (though some subclasses add limited magic)</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Spell Slots &mdash; Your Daily Magic Budget</div>
+                <div class="collapse-body">
+                    <p>Spells cost <span class="highlight">spell slots</span> to cast. Think of them like ammunition &mdash; once you use a slot, it's gone until you rest.</p>
+                    <ul>
+                        <li>Slots have <strong>levels</strong> (1st through 9th). Higher-level slots cast more powerful spells.</li>
+                        <li>You can cast a lower-level spell using a higher-level slot (often with a bonus effect).</li>
+                        <li>At level 1, a full caster typically has <strong>two 1st-level slots</strong>.</li>
+                        <li>Slots recharge on a <strong>long rest</strong> (except Warlocks, who recharge on a short rest).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Cantrips &mdash; Free Spells</div>
+                <div class="collapse-body">
+                    <p><span class="highlight">Cantrips</span> are level-0 spells that cost <strong>no spell slots</strong>. You can cast them as many times as you want. They're your go-to option when you don't want to burn a slot.</p>
+                    <p style="margin-top:0.3rem">Examples: <em>Fire Bolt</em> (ranged attack, 1d10 fire), <em>Light</em> (make something glow), <em>Mage Hand</em> (telekinetic hand), <em>Sacred Flame</em> (DEX save or 1d8 radiant).</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Prepared vs Known Spells</div>
+                <div class="collapse-body">
+                    <p>Different classes manage their spells differently:</p>
+                    <p style="margin-top:0.3rem"><strong>Prepared casters</strong> (Cleric, Druid, Paladin):</p>
+                    <ul>
+                        <li>You have access to your entire class spell list</li>
+                        <li>After each long rest, you choose which spells to <strong>prepare</strong> for the day</li>
+                        <li>Number of prepared spells = ability modifier + class level</li>
+                    </ul>
+                    <p style="margin-top:0.3rem"><strong>Known casters</strong> (Bard, Sorcerer, Ranger, Warlock):</p>
+                    <ul>
+                        <li>You permanently <strong>know</strong> a fixed number of spells</li>
+                        <li>You can swap one spell for a new one each time you level up</li>
+                    </ul>
+                    <p style="margin-top:0.3rem"><strong>Wizards</strong> (unique):</p>
+                    <ul>
+                        <li>You write spells into a <strong>spellbook</strong> (start with 6, add 2 per level)</li>
+                        <li>You can also copy spells from scrolls or other spellbooks you find</li>
+                        <li>Each day you <strong>prepare</strong> a subset from your spellbook</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-title">Equipment & Gold</div>
+
+            <div class="card">
+                <div class="card-title">Starting Equipment</div>
+                <p>You begin with gear from two sources:</p>
+                <ul>
+                    <li><strong>Class:</strong> Each class gives specific starting equipment (your character sheet lists it &mdash; weapons, armor, packs)</li>
+                    <li><strong>Background:</strong> Adds extra items and starting gold (usually 10-25 gp)</li>
+                </ul>
+                <p style="margin-top:0.3rem">During adventures, you'll find loot (gold, weapons, potions, magic items) and can buy new gear in towns.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Common Prices</div>
+                <div class="collapse-body">
+                    <table class="ref-table">
+                        <tr><th>Item</th><th>Cost</th></tr>
+                        <tr><td>Healing Potion</td><td>50 gp (heals 2d4+2)</td></tr>
+                        <tr><td>Rope (50 ft)</td><td>1 gp</td></tr>
+                        <tr><td>Torch (10)</td><td>1 sp</td></tr>
+                        <tr><td>Longsword</td><td>15 gp</td></tr>
+                        <tr><td>Chain Mail</td><td>75 gp</td></tr>
+                        <tr><td>Shield</td><td>10 gp</td></tr>
+                        <tr><td>Spellcasting Focus</td><td>5-20 gp</td></tr>
+                        <tr><td>Inn stay (modest)</td><td>5 sp/night</td></tr>
+                        <tr><td>Meal (modest)</td><td>3 sp</td></tr>
+                    </table>
+                    <p class="note">1 gold piece (gp) = 10 silver pieces (sp) = 100 copper pieces (cp)</p>
+                </div>
+            </div>
+
+            <div class="section-title">Leveling Up</div>
+
+            <div class="card">
+                <div class="card-title">How Characters Grow</div>
+                <p>Characters advance by <strong>gaining levels</strong> (1 through 20). This happens in two common ways:</p>
+                <ul>
+                    <li><strong>Experience Points (XP):</strong> Earn XP from encounters and milestones. When you hit the threshold for the next level, you level up.</li>
+                    <li><strong>Milestone leveling:</strong> The DM simply tells you when you level up based on story progress. (This is the more popular method.)</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">What You Get Each Level</div>
+                <div class="collapse-body">
+                    <p><strong>Every level:</strong></p>
+                    <ul>
+                        <li><strong>More HP:</strong> Roll your hit die (or take the average) + CON modifier</li>
+                        <li><strong>New class features</strong> at specific levels (check your class description)</li>
+                    </ul>
+                    <p style="margin-top:0.3rem"><strong>At certain levels:</strong></p>
+                    <ul>
+                        <li><span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Levels 4, 8, 12, 16, 19</span> <strong>Ability Score Improvement:</strong> Increase one ability score by 2, or two scores by 1 each. (Or take a Feat instead.)</li>
+                        <li><span class="tag" style="display:inline-block">Levels 5, 9, 13, 17</span> <strong>Proficiency bonus increases</strong> (+2 &rarr; +3 &rarr; +4 &rarr; +5 &rarr; +6)</li>
+                    </ul>
+                    <p style="margin-top:0.3rem"><strong>For spellcasters:</strong></p>
+                    <ul>
+                        <li>Gain more spell slots and access to higher-level spells</li>
+                        <li>Known casters learn new spells; Wizards add 2 to their spellbook</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">XP Thresholds by Level</div>
+                <div class="collapse-body">
+                    <table class="ref-table">
+                        <tr><th>Level</th><th>XP Needed</th><th>Prof. Bonus</th></tr>
+                        <tr><td>1</td><td>0</td><td>+2</td></tr>
+                        <tr><td>2</td><td>300</td><td>+2</td></tr>
+                        <tr><td>3</td><td>900</td><td>+2</td></tr>
+                        <tr><td>4</td><td>2,700</td><td>+2</td></tr>
+                        <tr><td>5</td><td>6,500</td><td>+3</td></tr>
+                        <tr><td>6</td><td>14,000</td><td>+3</td></tr>
+                        <tr><td>7</td><td>23,000</td><td>+3</td></tr>
+                        <tr><td>8</td><td>34,000</td><td>+3</td></tr>
+                        <tr><td>9</td><td>48,000</td><td>+4</td></tr>
+                        <tr><td>10</td><td>64,000</td><td>+4</td></tr>
+                    </table>
+                    <p class="note">Most campaigns run from levels 1-10 or 1-15. Level 20 is the absolute cap.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Key Class Milestones</div>
+                <div class="collapse-body">
+                    <p>Some exciting things to look forward to:</p>
+                    <ul>
+                        <li><strong>Level 2:</strong> Most classes get their subclass (path/school/domain/etc.)</li>
+                        <li><strong>Level 3:</strong> Fighters, Rogues, and some others get subclass here. Spellcasters get 2nd-level spells.</li>
+                        <li><strong>Level 4:</strong> First Ability Score Improvement (or Feat)!</li>
+                        <li><strong>Level 5:</strong> Big power spike &mdash; martial classes get Extra Attack; casters get 3rd-level spells (Fireball!).</li>
+                        <li><strong>Level 9:</strong> 5th-level spells for full casters (Raise Dead, Wall of Stone).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMBAT -->
+        <div class="panel" id="panel-combat">
+
+            <div class="section-title">How Combat Works</div>
+            <div class="card">
+                <div class="step-row"><span class="step-num">1</span><span class="step-text"><span class="highlight">Roll Initiative.</span> Everyone rolls d20 + DEX modifier. This determines turn order (highest goes first).</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">2</span><span class="step-text"><span class="highlight">Take Turns.</span> On your turn you get: <span class="tag">Movement</span> <span class="tag-gold">Action</span> <span class="tag">Bonus Action (if any)</span></span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">3</span><span class="step-text"><span class="highlight">Next Person.</span> After your turn ends, the next person in initiative order goes.</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">4</span><span class="step-text"><span class="highlight">New Round.</span> When everyone has gone once, a new round starts (back to the top of the order).</span></div>
+                <div class="arrow-flow">&#9660;</div>
+                <div class="step-row"><span class="step-num">5</span><span class="step-text"><span class="highlight">Repeat</span> until combat ends (enemies defeated, flee, surrender, etc.)</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">What Can I Do On My Turn?</div>
+                <div class="collapse-body">
+                    <p><strong>Movement:</strong> Move up to your speed (usually 25-30 feet). You can split movement before and after your action.</p>
+                    <p style="margin-top:0.3rem"><strong>Action (pick ONE):</strong></p>
+                    <ul>
+                        <li><strong>Attack</strong> &mdash; Make a melee or ranged attack</li>
+                        <li><strong>Cast a Spell</strong> &mdash; If the spell has a casting time of 1 action</li>
+                        <li><strong>Dash</strong> &mdash; Double your movement for this turn</li>
+                        <li><strong>Disengage</strong> &mdash; Move away without provoking opportunity attacks</li>
+                        <li><strong>Dodge</strong> &mdash; Attacks against you have disadvantage until your next turn</li>
+                        <li><strong>Help</strong> &mdash; Give an ally advantage on their next check or attack</li>
+                        <li><strong>Hide</strong> &mdash; Make a Stealth check to become hidden</li>
+                        <li><strong>Ready</strong> &mdash; Set a trigger: "When X happens, I do Y"</li>
+                        <li><strong>Search</strong> &mdash; Make a Perception or Investigation check</li>
+                        <li><strong>Use an Object</strong> &mdash; Interact with something (drink a potion, etc.)</li>
+                    </ul>
+                    <p style="margin-top:0.3rem"><strong>Bonus Action:</strong> Only if you have an ability that uses one (Second Wind, some spells, dual-wielding attack, etc.)</p>
+                    <p style="margin-top:0.3rem"><strong>Free Interaction:</strong> One small thing &mdash; open a door, draw a weapon, say something short.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">How to Attack</div>
+                <div class="collapse-body">
+                    <div class="step-row"><span class="step-num">1</span><span class="step-text">Choose a target within range</span></div>
+                    <div class="step-row"><span class="step-num">2</span><span class="step-text">Roll <span class="tag">d20 + attack modifier</span> (STR mod + prof bonus for melee, DEX mod + prof bonus for ranged)</span></div>
+                    <div class="step-row"><span class="step-num">3</span><span class="step-text">Compare to target's <span class="tag-gold">Armor Class (AC)</span>. Equal or higher = hit!</span></div>
+                    <div class="step-row"><span class="step-num">4</span><span class="step-text">If you hit, roll <span class="tag-red">damage dice</span> for your weapon + ability modifier</span></div>
+                    <p class="note" style="margin-top:0.4rem">Nat 20 = critical hit (double damage dice). Nat 1 = automatic miss.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">How Spellcasting Works in Combat</div>
+                <div class="collapse-body">
+                    <p>Spells use <strong>spell slots</strong>. Once a slot is used, it's gone until you rest.</p>
+                    <p style="margin-top:0.3rem">Two types of offensive spells:</p>
+                    <ul>
+                        <li><strong>Spell attack:</strong> You roll d20 + spellcasting modifier + prof bonus vs target's AC (like a weapon attack)</li>
+                        <li><strong>Saving throw:</strong> The <em>target</em> rolls a saving throw vs your <strong>Spell Save DC</strong> (8 + prof bonus + spellcasting modifier). They resist on success.</li>
+                    </ul>
+                    <p style="margin-top:0.3rem"><strong>Cantrips</strong> are free &mdash; no spell slot needed. You can cast them every turn.</p>
+                    <p class="note">Concentration: Some spells require concentration. You can only concentrate on one spell at a time. Taking damage may break it (CON save, DC = half damage taken or 10, whichever is higher).</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title collapsible" onclick="toggleCollapse(this)">Reactions & Opportunity Attacks</div>
+                <div class="collapse-body">
+                    <p>You get <strong>one reaction</strong> per round (resets at the start of your turn). The most common reaction:</p>
+                    <p style="margin-top:0.3rem"><strong>Opportunity Attack:</strong> When an enemy you can see moves <em>out of</em> your melee reach, you can use your reaction to make one melee attack against them.</p>
+                    <p style="margin-top:0.3rem">To avoid provoking: use the <strong>Disengage</strong> action, or teleport, or be moved by someone else's spell/ability.</p>
+                </div>
+            </div>
+
+            <div class="section-title">Initiative Tracker</div>
+            <p class="note" style="margin-bottom:0.5rem">Add each character/monster with their initiative roll. The tracker sorts by initiative and steps through turns.</p>
+
+            <div class="input-row">
+                <input type="text" id="init-name" placeholder="Name..." maxlength="25">
+                <input type="number" id="init-roll" placeholder="Init" min="1" max="30">
+                <input type="number" id="init-hp" placeholder="HP" min="1" max="999">
+                <button class="sm-btn" onclick="addCombatant()">Add</button>
+            </div>
+
+            <div class="round-display" id="round-display" style="display:none">
+                Round <strong id="round-num">1</strong>
+            </div>
+
+            <div class="turn-list" id="turn-list"></div>
+
+            <div class="combat-btns" id="combat-btns" style="display:none">
+                <button class="sm-btn-gold sm-btn" onclick="nextTurn()">Next Turn &#9654;</button>
+                <button class="sm-btn-outline sm-btn" onclick="resetCombat()">Reset Combat</button>
+            </div>
+
+            <div class="turn-actions-box" id="turn-actions" style="display:none">
+                <div class="box-title" id="turn-whose">Current turn: ...</div>
+                <p style="font-size:0.8rem; color:#b0a5c8; margin-bottom:0.3rem">On your turn you can:</p>
+                <ul>
+                    <li><strong>Move</strong> up to your speed</li>
+                    <li><strong>Take one Action</strong> (Attack, Cast Spell, Dash, Dodge, Help, Hide, Disengage, Ready, Search, Use Object)</li>
+                    <li><strong>Bonus Action</strong> (only if you have one available)</li>
+                    <li><strong>Free interaction</strong> (open door, draw weapon, etc.)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DICE & CHECKS -->
+        <div class="panel" id="panel-dice">
+
+            <div class="section-title">Dice Roller</div>
+
+            <div class="dice-grid">
+                <div class="dice-btn selected" onclick="selectDie(4, this)">d4<span class="dice-label">1-4</span></div>
+                <div class="dice-btn" onclick="selectDie(6, this)">d6<span class="dice-label">1-6</span></div>
+                <div class="dice-btn" onclick="selectDie(8, this)">d8<span class="dice-label">1-8</span></div>
+                <div class="dice-btn" onclick="selectDie(10, this)">d10<span class="dice-label">1-10</span></div>
+                <div class="dice-btn" onclick="selectDie(12, this)">d12<span class="dice-label">1-12</span></div>
+                <div class="dice-btn selected" onclick="selectDie(20, this)">d20<span class="dice-label">1-20</span></div>
+                <div class="dice-btn" onclick="selectDie(100, this)">d100<span class="dice-label">1-100</span></div>
+                <div class="dice-btn" onclick="selectDie(0, this)">2d6<span class="dice-label">2-12</span></div>
+            </div>
+
+            <div class="modifier-row">
+                <label>Modifier:</label>
+                <input type="number" id="dice-modifier" value="0">
+                <label>Count:</label>
+                <input type="number" id="dice-count" value="1" min="1" max="20">
+            </div>
+
+            <div class="adv-toggle" id="adv-toggle">
+                <button class="adv-btn" onclick="setAdvantage('normal', this)">Normal</button>
+                <button class="adv-btn" onclick="setAdvantage('advantage', this)">Advantage</button>
+                <button class="adv-btn" onclick="setAdvantage('disadvantage', this)">Disadvantage</button>
+            </div>
+
+            <button class="roll-big-btn" onclick="rollDice()">🎲 Roll!</button>
+
+            <div class="dice-result-area" id="dice-result">
+                <div style="color:#7a6a58; font-size:0.9rem">Choose a die and roll!</div>
+            </div>
+
+            <div class="section-title">Quick Check Guide</div>
+
+            <div class="card">
+                <div class="card-title">When the DM says "Make a ___ check":</div>
+                <div class="step-row"><span class="step-num">1</span><span class="step-text">Find that skill on your character sheet</span></div>
+                <div class="step-row"><span class="step-num">2</span><span class="step-text">Roll d20</span></div>
+                <div class="step-row"><span class="step-num">3</span><span class="step-text">Add the modifier shown next to that skill (it already includes proficiency if you have it)</span></div>
+                <div class="step-row"><span class="step-num">4</span><span class="step-text">Tell the DM your total</span></div>
+                <p class="note">Example: DM says "Make a Perception check." Your sheet shows Perception +4. You roll a 13. Total = 17. "I got 17."</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">When the DM says "Make a ___ saving throw":</div>
+                <div class="step-row"><span class="step-num">1</span><span class="step-text">Find that saving throw on your character sheet (Saving Throws section)</span></div>
+                <div class="step-row"><span class="step-num">2</span><span class="step-text">Roll d20 + the modifier shown</span></div>
+                <div class="step-row"><span class="step-num">3</span><span class="step-text">Tell the DM your total. They'll tell you if you passed or failed.</span></div>
+                <p class="note">Example: "Make a DEX saving throw." Your DEX save is +4. Roll 15 + 4 = 19.</p>
+            </div>
+        </div>
+
+        <!-- REFERENCE -->
+        <div class="panel" id="panel-ref">
+
+            <div class="section-title">Actions in Combat</div>
+            <div class="card" style="overflow-x:auto">
+                <table class="ref-table">
+                    <tr><th>Action</th><th>What It Does</th></tr>
+                    <tr><td>Attack</td><td>Make one melee or ranged attack (some classes get multiple at higher levels)</td></tr>
+                    <tr><td>Cast a Spell</td><td>Cast a spell with a casting time of 1 action</td></tr>
+                    <tr><td>Dash</td><td>Gain extra movement equal to your speed for this turn</td></tr>
+                    <tr><td>Disengage</td><td>Your movement doesn't provoke opportunity attacks for the rest of the turn</td></tr>
+                    <tr><td>Dodge</td><td>Attacks against you have disadvantage; you have advantage on DEX saves</td></tr>
+                    <tr><td>Help</td><td>Give one ally advantage on their next ability check or attack roll</td></tr>
+                    <tr><td>Hide</td><td>Make a DEX (Stealth) check to become hidden</td></tr>
+                    <tr><td>Ready</td><td>Prepare an action with a trigger ("When the goblin moves, I attack")</td></tr>
+                    <tr><td>Search</td><td>Make a WIS (Perception) or INT (Investigation) check</td></tr>
+                    <tr><td>Use Object</td><td>Interact with an object (drink potion, activate item, etc.)</td></tr>
+                </table>
+            </div>
+
+            <div class="section-title">Common Conditions</div>
+            <div class="card" style="overflow-x:auto">
+                <table class="ref-table">
+                    <tr><th>Condition</th><th>Effect</th></tr>
+                    <tr><td>Blinded</td><td>Auto-fail sight checks. Attacks have disadvantage; attacks against you have advantage.</td></tr>
+                    <tr><td>Charmed</td><td>Can't attack the charmer. Charmer has advantage on social checks against you.</td></tr>
+                    <tr><td>Frightened</td><td>Disadvantage on checks/attacks while you can see the source. Can't move closer to it.</td></tr>
+                    <tr><td>Grappled</td><td>Speed becomes 0. Ends if grappler is incapacitated or you're moved out of reach.</td></tr>
+                    <tr><td>Incapacitated</td><td>Can't take actions or reactions.</td></tr>
+                    <tr><td>Invisible</td><td>Can't be seen. Attacks against you have disadvantage; your attacks have advantage.</td></tr>
+                    <tr><td>Paralyzed</td><td>Incapacitated, auto-fail STR/DEX saves. Attacks have advantage; melee hits are crits.</td></tr>
+                    <tr><td>Poisoned</td><td>Disadvantage on attack rolls and ability checks.</td></tr>
+                    <tr><td>Prone</td><td>Disadvantage on attacks. Melee attacks against you have advantage; ranged have disadvantage. Costs half movement to stand up.</td></tr>
+                    <tr><td>Restrained</td><td>Speed 0. Attacks have disadvantage; attacks against you have advantage. Disadvantage on DEX saves.</td></tr>
+                    <tr><td>Stunned</td><td>Incapacitated, auto-fail STR/DEX saves. Attacks against you have advantage.</td></tr>
+                    <tr><td>Unconscious</td><td>Incapacitated, drop what you're holding, fall prone. Auto-fail STR/DEX saves. Attacks have advantage; melee hits are crits.</td></tr>
+                </table>
+            </div>
+
+            <div class="section-title">Difficulty Classes (DC)</div>
+            <div class="card">
+                <p style="margin-bottom:0.4rem">When the DM sets a DC for a check, here's what the numbers mean:</p>
+                <table class="ref-table">
+                    <tr><th>DC</th><th>Difficulty</th><th>Example</th></tr>
+                    <tr><td>5</td><td>Very Easy</td><td>Climb a knotted rope</td></tr>
+                    <tr><td>10</td><td>Easy</td><td>Hear a loud conversation through a door</td></tr>
+                    <tr><td>15</td><td>Medium</td><td>Pick a typical lock, calm a frightened horse</td></tr>
+                    <tr><td>20</td><td>Hard</td><td>Swim against a strong current, pick a good lock</td></tr>
+                    <tr><td>25</td><td>Very Hard</td><td>Leap across a 30-foot chasm</td></tr>
+                    <tr><td>30</td><td>Nearly Impossible</td><td>Something legendary</td></tr>
+                </table>
+            </div>
+
+            <div class="section-title">Cover</div>
+            <div class="card">
+                <table class="ref-table">
+                    <tr><th>Cover</th><th>Benefit</th><th>Example</th></tr>
+                    <tr><td>Half Cover</td><td>+2 AC and DEX saves</td><td>Low wall, furniture, another creature</td></tr>
+                    <tr><td>Three-Quarters</td><td>+5 AC and DEX saves</td><td>Arrow slit, thick tree trunk</td></tr>
+                    <tr><td>Total Cover</td><td>Can't be targeted directly</td><td>Completely behind a wall</td></tr>
+                </table>
+            </div>
+
+            <div class="section-title">Damage Types</div>
+            <div class="card">
+                <p style="font-size:0.8rem; color:#c0b090; line-height:1.6">
+                    <span class="tag">Bludgeoning</span>
+                    <span class="tag">Piercing</span>
+                    <span class="tag">Slashing</span>
+                    <span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Fire</span>
+                    <span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Cold</span>
+                    <span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Lightning</span>
+                    <span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Thunder</span>
+                    <span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Acid</span>
+                    <span class="tag-gold" style="display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#d4a843">Poison</span>
+                    <span class="tag-red" style="display:inline-block;background:rgba(180,50,50,0.15);border:1px solid rgba(180,80,80,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#e88">Necrotic</span>
+                    <span class="tag-red" style="display:inline-block;background:rgba(180,50,50,0.15);border:1px solid rgba(180,80,80,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#e88">Radiant</span>
+                    <span class="tag-red" style="display:inline-block;background:rgba(180,50,50,0.15);border:1px solid rgba(180,80,80,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#e88">Force</span>
+                    <span class="tag-red" style="display:inline-block;background:rgba(180,50,50,0.15);border:1px solid rgba(180,80,80,0.3);border-radius:6px;padding:0.1rem 0.4rem;font-size:0.7rem;font-weight:700;color:#e88">Psychic</span>
+                </p>
+                <p class="note">Physical damage (bludgeoning, piercing, slashing) comes from weapons. The rest come from magic, breath weapons, and special effects. Some creatures resist or are immune to certain types.</p>
+            </div>
+
+            <div class="section-title">Death & Dying</div>
+            <div class="card">
+                <p><strong>When you drop to 0 HP:</strong> You fall <span class="highlight">unconscious</span> and start making <strong>death saving throws</strong> at the start of each of your turns.</p>
+                <ul style="margin-top:0.3rem">
+                    <li>Roll a d20. <strong>10 or higher = success</strong>. Below 10 = failure.</li>
+                    <li><strong>3 successes:</strong> You stabilize (unconscious but no longer dying).</li>
+                    <li><strong>3 failures:</strong> Your character dies.</li>
+                    <li><strong>Natural 20:</strong> You regain 1 HP and wake up!</li>
+                    <li><strong>Natural 1:</strong> Counts as 2 failures.</li>
+                </ul>
+                <p style="margin-top:0.3rem">An ally can stabilize you with a <strong>DC 10 Medicine check</strong> or any amount of healing.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// --- Tab switching ---
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.closest('.tab').classList.add('active');
+}
+
+// --- Collapsible sections ---
+function toggleCollapse(el) {
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+}
+
+// --- Combat Tracker ---
+let combatants = [];
+let currentTurn = -1;
+let round = 1;
+let combatStarted = false;
+
+function addCombatant() {
+    const nameEl = document.getElementById('init-name');
+    const rollEl = document.getElementById('init-roll');
+    const hpEl = document.getElementById('init-hp');
+
+    const name = nameEl.value.trim();
+    const init = parseInt(rollEl.value);
+
+    if (!name) { nameEl.focus(); return; }
+    if (isNaN(init)) { rollEl.focus(); return; }
+
+    const hp = parseInt(hpEl.value) || null;
+
+    combatants.push({ name, init, hp, maxHp: hp });
+    combatants.sort((a, b) => b.init - a.init);
+
+    nameEl.value = '';
+    rollEl.value = '';
+    hpEl.value = '';
+    nameEl.focus();
+
+    if (combatStarted) {
+        // Insert into existing combat
+    } else {
+        currentTurn = -1;
+    }
+
+    renderTurnList();
+}
+
+function removeCombatant(index) {
+    if (index <= currentTurn && currentTurn > 0) currentTurn--;
+    combatants.splice(index, 1);
+    if (combatants.length === 0) {
+        combatStarted = false;
+        currentTurn = -1;
+        round = 1;
+    }
+    renderTurnList();
+}
+
+function adjustHP(index, amount) {
+    if (combatants[index].hp !== null) {
+        combatants[index].hp = Math.max(0, combatants[index].hp + amount);
+        renderTurnList();
+    }
+}
+
+function nextTurn() {
+    if (combatants.length === 0) return;
+    combatStarted = true;
+    currentTurn++;
+    if (currentTurn >= combatants.length) {
+        currentTurn = 0;
+        round++;
+    }
+    renderTurnList();
+}
+
+function resetCombat() {
+    combatants = [];
+    currentTurn = -1;
+    round = 1;
+    combatStarted = false;
+    renderTurnList();
+}
+
+function renderTurnList() {
+    const list = document.getElementById('turn-list');
+    const btns = document.getElementById('combat-btns');
+    const roundDisp = document.getElementById('round-display');
+    const actions = document.getElementById('turn-actions');
+
+    if (combatants.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#7a6a58;font-size:0.85rem;padding:1rem">Add characters to start tracking combat</p>';
+        btns.style.display = 'none';
+        roundDisp.style.display = 'none';
+        actions.style.display = 'none';
+        return;
+    }
+
+    btns.style.display = 'flex';
+    roundDisp.style.display = combatStarted ? 'block' : 'none';
+    document.getElementById('round-num').textContent = round;
+
+    list.innerHTML = combatants.map((c, i) => {
+        const isActive = combatStarted && i === currentTurn;
+        const hpDisplay = c.hp !== null ? `<span class="turn-hp">${c.hp}/${c.maxHp} HP</span>
+            <button class="turn-remove" onclick="adjustHP(${i}, -1)" title="Damage 1">-</button>
+            <button class="turn-remove" onclick="adjustHP(${i}, 1)" title="Heal 1">+</button>` : '';
+        return `<div class="turn-entry ${isActive ? 'active-turn' : ''}">
+            <span class="turn-init">${c.init}</span>
+            <span class="turn-name">${isActive ? '&#9654; ' : ''}${c.name}</span>
+            ${hpDisplay}
+            <button class="turn-remove" onclick="removeCombatant(${i})" title="Remove">&times;</button>
+        </div>`;
+    }).join('');
+
+    if (combatStarted && currentTurn >= 0 && currentTurn < combatants.length) {
+        actions.style.display = 'block';
+        document.getElementById('turn-whose').textContent = `${combatants[currentTurn].name}'s Turn`;
+    } else {
+        actions.style.display = 'none';
+    }
+}
+
+document.getElementById('init-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        const rollEl = document.getElementById('init-roll');
+        if (!rollEl.value) rollEl.focus();
+        else addCombatant();
+    }
+});
+document.getElementById('init-roll').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addCombatant();
+});
+document.getElementById('init-hp').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addCombatant();
+});
+
+renderTurnList();
+
+// --- Dice Roller ---
+let selectedDie = 20;
+let advantageMode = 'normal';
+
+function selectDie(sides, btn) {
+    document.querySelectorAll('.dice-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDie = sides;
+    // Show/hide advantage toggle (only for d20)
+    document.getElementById('adv-toggle').style.display = (sides === 20) ? 'flex' : 'none';
+}
+
+// Initialize: select d20
+document.querySelectorAll('.dice-btn')[5].classList.add('selected');
+document.querySelectorAll('.dice-btn').forEach(b => {
+    if (b !== document.querySelectorAll('.dice-btn')[5]) b.classList.remove('selected');
+});
+
+function setAdvantage(mode, btn) {
+    advantageMode = mode;
+    document.querySelectorAll('.adv-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
+// Initialize normal selected
+document.querySelectorAll('.adv-btn')[0].classList.add('selected');
+
+function rollDice() {
+    const modifier = parseInt(document.getElementById('dice-modifier').value) || 0;
+    const count = Math.max(1, Math.min(20, parseInt(document.getElementById('dice-count').value) || 1));
+    const resultArea = document.getElementById('dice-result');
+
+    resultArea.classList.remove('rolling', 'dice-nat20', 'dice-nat1');
+    void resultArea.offsetWidth; // force reflow
+    resultArea.classList.add('rolling');
+
+    let html = '';
+
+    if (selectedDie === 20 && count === 1 && advantageMode !== 'normal') {
+        // Advantage/disadvantage: roll 2d20
+        const roll1 = Math.floor(Math.random() * 20) + 1;
+        const roll2 = Math.floor(Math.random() * 20) + 1;
+        const chosen = advantageMode === 'advantage' ? Math.max(roll1, roll2) : Math.min(roll1, roll2);
+        const total = chosen + modifier;
+        const modStr = modifier !== 0 ? (modifier > 0 ? ` + ${modifier}` : ` - ${Math.abs(modifier)}`) : '';
+
+        resultArea.className = 'dice-result-area rolling';
+        if (chosen === 20) resultArea.classList.add('dice-nat20');
+        if (chosen === 1) resultArea.classList.add('dice-nat1');
+
+        html = `<div class="dice-result-num">${total}</div>`;
+        html += `<div class="dice-result-detail">`;
+        html += `d20 (${advantageMode}): ${roll1} and ${roll2} &rarr; took <strong>${chosen}</strong>${modStr}`;
+        if (chosen === 20) html += `<br><strong style="color:#4ade80">NATURAL 20!</strong>`;
+        if (chosen === 1) html += `<br><strong style="color:#f87171">NATURAL 1!</strong>`;
+        html += `</div>`;
+    } else if (selectedDie === 0) {
+        // 2d6
+        let allRolls = [];
+        let grandTotal = 0;
+        for (let c = 0; c < count; c++) {
+            const r1 = Math.floor(Math.random() * 6) + 1;
+            const r2 = Math.floor(Math.random() * 6) + 1;
+            allRolls.push([r1, r2]);
+            grandTotal += r1 + r2;
+        }
+        grandTotal += modifier;
+        const modStr = modifier !== 0 ? (modifier > 0 ? ` + ${modifier}` : ` - ${Math.abs(modifier)}`) : '';
+
+        resultArea.className = 'dice-result-area rolling';
+        html = `<div class="dice-result-num">${grandTotal}</div>`;
+        if (count === 1) {
+            html += `<div class="dice-result-detail">2d6: [${allRolls[0][0]}, ${allRolls[0][1]}] = ${allRolls[0][0] + allRolls[0][1]}${modStr}</div>`;
+        } else {
+            const parts = allRolls.map(r => `(${r[0]}+${r[1]})`).join(' + ');
+            html += `<div class="dice-result-detail">${count}&times;2d6: ${parts}${modStr}</div>`;
+        }
+    } else {
+        // Standard dice
+        const rolls = [];
+        for (let i = 0; i < count; i++) {
+            rolls.push(Math.floor(Math.random() * selectedDie) + 1);
+        }
+        const sum = rolls.reduce((a, b) => a + b, 0);
+        const total = sum + modifier;
+        const modStr = modifier !== 0 ? (modifier > 0 ? ` + ${modifier}` : ` - ${Math.abs(modifier)}`) : '';
+
+        resultArea.className = 'dice-result-area rolling';
+        if (selectedDie === 20 && count === 1 && rolls[0] === 20) resultArea.classList.add('dice-nat20');
+        if (selectedDie === 20 && count === 1 && rolls[0] === 1) resultArea.classList.add('dice-nat1');
+
+        html = `<div class="dice-result-num">${total}</div>`;
+        if (count === 1) {
+            html += `<div class="dice-result-detail">d${selectedDie}: ${rolls[0]}${modStr}`;
+        } else {
+            html += `<div class="dice-result-detail">${count}d${selectedDie}: [${rolls.join(', ')}] = ${sum}${modStr}`;
+        }
+        if (selectedDie === 20 && count === 1 && rolls[0] === 20) html += `<br><strong style="color:#4ade80">NATURAL 20!</strong>`;
+        if (selectedDie === 20 && count === 1 && rolls[0] === 1) html += `<br><strong style="color:#f87171">NATURAL 1!</strong>`;
+        html += `</div>`;
+    }
+
+    resultArea.innerHTML = html;
+}
+    </script>
+</body>
+</html>
